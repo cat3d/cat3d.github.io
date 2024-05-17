@@ -522,7 +522,7 @@ var intervalId = window.setInterval(function(){
         if (isIOS) {
           // Autoplay doesn't seem to work.
           componentVideo.classList = "video";
-          componentVideo.src = "https://storage.googleapis.com/gallery_videos/v0/" + videoPath;
+          componentVideo.src = "https://storage.googleapis.com/gallery_videos/v1/" + videoPath;
           componentVideo.controls = true;
         } else {
           componentVideo.controls = false;
@@ -536,7 +536,7 @@ var intervalId = window.setInterval(function(){
           componentSource = document.createElement("SOURCE")
           componentSource.type = "video/mp4"
           componentSource.setAttribute('data-src',
-            "https://storage.googleapis.com/gallery_videos/v0/" + videoPath);
+            "https://storage.googleapis.com/gallery_videos/v1/" + videoPath);
           componentVideo.appendChild(componentSource);
         }
         inner.appendChild(componentVideo);
