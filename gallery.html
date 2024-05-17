@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>CAT3D: Create Anything in 3D with Multi-View Diffusion Models</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:image" content="https://cat3d.github.io/img/method.jpg">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1711">
+    <meta property="og:image:height" content="576">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cat3d.github.io/" />
+    <meta property="og:title" content="CAT3D: Create Anything in 3D with Multi-View Diffusion Models" />
+    <meta property="og:description"
+        content="Advances in 3D reconstruction have enabled high-quality 3D capture, but require a user to collect hundreds to thousands of images to create a 3D scene. We present CAT3D, a method for creating anything in 3D by simulating this real-world capture process with a multi-view diffusion model. Given any number of input images and a set of target novel viewpoints, our model generates consistent novel images of a scene. These generated views can be used as input to standard 3D reconstruction techniques to produce explicit 3D representations that can be rendered from any viewpoint in real time. CAT3D can create entire 3D scenes in as little as one minute, and outperforms existing methods for single image and few-view 3D scene creation." />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CAT3D: Create Anything in 3D with Multi-View Diffusion Models" />
+    <meta name="twitter:description"
+        content="Advances in 3D reconstruction have enabled high-quality 3D capture, but require a user to collect hundreds to thousands of images to create a 3D scene. We present CAT3D, a method for creating anything in 3D by simulating this real-world capture process with a multi-view diffusion model. Given any number of input images and a set of target novel viewpoints, our model generates consistent novel images of a scene. These generated views can be used as input to standard 3D reconstruction techniques to produce explicit 3D representations that can be rendered from any viewpoint in real time. CAT3D can create entire 3D scenes in as little as one minute, and outperforms existing methods for single image and few-view 3D scene creation." />
+    <meta name="twitter:image" content="https://cat3d.github.io/img/method.jpg" />
+    <!-- <meta
+  	http-equiv="Content-Security-Policy"
+  	content="script-src-elem * 'self' 'unsafe-inline';" />-->
+
+    <link rel="icon" href="favicon.ico">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8ZERS5BVPS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-8ZERS5BVPS');
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+        </script>
+    <script defer src="js/fontawesome.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/synced_video_selector.js"></script>
+
+    <style>
+        .final-element {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body style="padding: 5%; padding-top: min(15px, 5%); width: 100%">
+    <div class="container-lg text-center" style="max-width: 1500px; margin: auto;" id="main">
+        <!-- <div class="container" id="main"> -->
+        <div class="row">
+                <h2 class="col-md-12 text-center">
+                    <span class="active3d"><b>CAT3D</b></span>: Create Anything in 3D with Multi-View Diffusion Models</br>
+                </h2>
+        </div>
+        <div class="row text-center">
+            <div class="col-md-3">
+            </div>
+            <div class="container-fluid text-center">
+                <ul class="list-inline" style="white-space: nowrap; margin:0px 0px 0px 0px;" >
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://ruiqigao.github.io/">Ruiqi Gao¹</a><!--don't add a linebreak here! it adds a space!--><div style="display: inline; font-family:verdana">*</div>
+                    </li>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://holynski.org/">Aleksander Holynski¹</a><!--don't add a linebreak here! it adds a space!--><div style="display: inline; font-family:verdana">*</div>
+                    </li><br>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://henzler.github.io/">Philipp Henzler²</a></li>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://github.com/ArthurBrussee">Arthur Brussee¹</a></li>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://ricardomartinbrualla.com/">Ricardo Martin-Brualla²</a></li><br>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://pratulsrinivasan.github.io/">Pratul P. Srinivasan¹</a></li>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://jonbarron.info/">Jonathan T. Barron¹</a></li>
+                    <li><a style="font-size: calc(min(3vw, 15px))"  href="https://poolio.github.io/">Ben Poole¹</a><!--don't add a linebreak here! it adds a space!--><div style="display: inline; font-family:verdana">*</div></li>
+                </ul>
+            </div>
+            <div class="col-md-12 text-center" style="font-size: calc(min(3vw, 15px))">
+		¹Google DeepMind&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;²Google Research&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div style="display: inline; font-family:verdana; font-size: calc(min(3vw, 15px))">*</div>equal contribution
+            </div>
+        </div>
+        <div class="row text-center">
+            <span class="link-block" style="padding-top: 10px; padding-bottom: 10px">
+                <a href="#" class="external-link button is-normal is-rounded is-dark"
+                    style="width: 80px; font-size: 15px">
+                    <span class="icon">
+                        <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv</span>
+                </a>
+                <a href="index.html" class="external-link button is-normal is-rounded is-dark"
+                    style="width: 120px; font-size: 15px">
+                    <span>Project Page</span>
+                </a>
+            </span>
+        </div>
+
+
+    <div class="container" id="videoGallery" class="video-gallery">
+      <!-- Search / Filter -->
+      <div class="sticky-top" style="width: 100%">
+        <center>
+          <div class="row search">
+            <div class="col-sm-12">
+              <div class="card"> 
+                <div class="card-body"> 
+                  <h4>Search assets.</h4>
+                  <input id="search" class="search form-control form-control-lg" type="text" placeholder="e.g.: dog, cat, tree, fwd, orbit"> 
+                </div> 
+              </div>
+            </div>
+          </div>
+        </center>
+      </div>
+  
+      <!-- Thumbnails -->
+      <div id="thumbnails" class="card-columns captioned_videos list"></div>
+    </div>
+
+    <script src="./js/stopExecutionTimeout.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.js?features=IntersectionObserver"></script>
+    <script src="./js/yall.js"></script>
+    <script>
+    if (document.location.search.match(/type=embed/gi)) {
+      window.parent.postMessage("resize", "*");
+    }
+
+/*
+const bucket = "https://storage.googleapis.com/gallery_videos/v0"
+
+async function listFolders() {
+    // Interacting with the google cloud storage APIS requires full on node installatiosn and such so meh, just parse the returned XML :) 
+    let xmlDoc = await fetch(bucket).then(response => response.text()).then(xmlString => {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+        return xmlDoc;
+    }).catch(error => {
+        console.error('Error:', error);
+    });
+    const contentsElements = xmlDoc.getElementsByTagName('Contents');
+    let nodeArray = [].slice.call(contentsElements);
+
+    function xmlToKey(folder) {
+        let key = folder.getElementsByTagName("Key")[0].textContent;
+        let parts = key.split("/");
+        return parts[0] + "/" + parts[1];
+    }
+
+    const keys = [...new Set(nodeArray.map(f => xmlToKey(f)))];
+    return keys.filter(f => f.includes(".mp4"))
+}   
+
+    let files = listFolders();
+    console.log(files)
+	console.log("hello")*/
+  
+    const shuffleArray = array => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+      }
+    }
+  
+    var videoPaths = [
+"3d_cartoon_boy_orbit.mp4",
+"3d_cartoon_folk_singers_orbit.mp4",
+"a_cafe_adorned_with_indoor_plants_orbit.mp4",
+"a_very_strange_burger_orbit.mp4",
+"abstract_art_waves_blue_orbit.mp4",
+"abstract_art_waves_orbit.mp4",
+"adorable_whimsical_fantasy_creature_orbit.mp4",
+"adventurer_standing_in_forest_2_fwd.mp4",
+"adventurer_standing_in_forest_fwd.mp4",
+"adventurous_teddy_bear_orbit.mp4",
+"alien_merchant_fwd.mp4",
+"alley_fwd.mp4",
+"alpaca_wearing_a_suit_orbit.mp4",
+"an_artistic_letter_a_orbit.mp4",
+"angry_t_rex_orbit.mp4",
+"anime_character_in_lab_coat_fwd.mp4",
+"arches_national_park_orbit.mp4",
+"astronaut_close_up_fwd.mp4",
+"astronaut_in_colorful_cave_orbit.mp4",
+"astronaut_in_front_of_landscape_fwd.mp4",
+"astronaut_standing_in_front_of_landscape_orbit.mp4",
+"baby_dragon_drinking_boba_orbit.mp4",
+"bagel_with_cream_cheese_and_salmon_fwd.mp4",
+"bagel_with_cream_cheese_and_salmon_orbit.mp4",
+"banana_orange_juice_fwd.mp4",
+"basket_of_dumplings_fwd.mp4",
+"beached_sailboat_fwd.mp4",
+"bear_in_classroom_fwd.mp4",
+"bear_playing_guitar_fwd.mp4",
+"bee_drinking_honey_orbit.mp4",
+"big_tree_fwd.mp4",
+"bonsai_fwd.mp4",
+"bonsai_tree_orbit.mp4",
+"bowl_of_cereal_fwd.mp4",
+"bowl_on_table_fwd.mp4",
+"boy_looking_at_house_fwd.mp4",
+"boy_riding_llama_fwd.mp4",
+"bubbly_hair_character_fwd.mp4",
+"bunker_in_forest_fwd.mp4",
+"bust_statue_in_museum_fwd.mp4",
+"bustling_city_market_fwd.mp4",
+"busy_city_market_fwd.mp4",
+"cactus_in_pot_fwd.mp4",
+"cartoon_arcade_fwd.mp4",
+"cat_and_christmas_tree_orbit.mp4",
+"cat_and_coffee_fwd.mp4",
+"cat_wearing_striped_tshirt_orbit.mp4",
+"cat_with_striped_tshirt_fwd.mp4",
+"cats_on_a_table_outside_orbit.mp4",
+"cauliflower_sheep_head_fwd.mp4",
+"cauliflower_sheep_head_orbit.mp4",
+"ceramic_blue_and_white_dragon_orbit.mp4",
+"ceramic_octopus_orbit.mp4",
+"ceramic_rabbit_orbit.mp4",
+"chair_in_library_study_fwd.mp4",
+"cheeseburger_orbit.mp4",
+"cherry_blossom_fwd.mp4",
+"chilling_chihuahua_orbit.mp4",
+"cinnamon_bun_orbit.mp4",
+"colorful_bird_fwd.mp4",
+"colorful_forest_fwd.mp4",
+"colorful_living_room_orbit.mp4",
+"corgi_salmon_sushi_orbit.mp4",
+"country_manor_mansion_fwd.mp4",
+"cowboy_boot_orbit.mp4",
+"cozy_bedroom_fwd.mp4",
+"crab_shaped_thing_on_plate_fwd.mp4",
+"creepy_forest_fwd.mp4",
+"creepy_house_fwd.mp4",
+"crochet_amigurumi_boy_with_glasses_orbit.mp4",
+"crochet_amigurumi_motorcycle_orbit.mp4",
+"crochet_amigurumi_tractor_orbit.mp4",
+"crocodile_playing_drum_orbit.mp4",
+"croissant_fwd.mp4",
+"cute_dog_in_maid_outfit_orbit.mp4",
+"dachshund_dog_fwd.mp4",
+"deer_holding_bow_fwd.mp4",
+"deer_holding_bow_orbit.mp4",
+"degas_the_dance_class_fwd.mp4",
+"dew_on_leaves_fwd.mp4",
+"dog_coffee_this_is_fine_fwd.mp4",
+"dog_in_space_fwd.mp4",
+"dolphin_wearing_sunglasses_fwd.mp4",
+"dolphin_wearing_sunglasses_orbit.mp4",
+"einstein_bobblehead_fwd.mp4",
+"everglades_house_fwd.mp4",
+"exterior_architecture_fwd.mp4",
+"family_of_monsters_orbit.mp4",
+"fancy_bathroom_fwd.mp4",
+"fancy_couch_fwd.mp4",
+"field_of_lavender_orbit.mp4",
+"fine_dining_dinner_dish_fwd.mp4",
+"fire_breathing_dragon_fwd.mp4",
+"firefighter_dog_orbit.mp4",
+"frog_wearing_leather_suit_and_top_hat_orbit.mp4",
+"frozen_lighthouse_fwd.mp4",
+"frozen_lighthouse_orbit.mp4",
+"full_english_breakfast_fwd.mp4",
+"furry_green_gremlin_troll_orbit.mp4",
+"futuristic_cyborg_suit_orbit.mp4",
+"gallery_shopping_mall_orbit.mp4",
+"geometric_motorcycle_orbit.mp4",
+"gingerbread_tower_orbit.mp4",
+"giraffe_ocopus_eating_cake_orbit.mp4",
+"girl_looking_at_house_2_fwd.mp4",
+"girl_looking_at_house_fwd.mp4",
+"grand_canyon_fwd.mp4",
+"great_hall_fwd.mp4",
+"green_chair_4_fwd.mp4",
+"green_chair_5_fwd.mp4",
+"green_chair_orbit.mp4",
+"green_forest_fwd.mp4",
+"green_ice_cream_orbit.mp4",
+"grocery_shopping_teddy_bears_fwd.mp4",
+"gummy_bear_playing_saxophone_orbit.mp4",
+"handbag_fwd.mp4",
+"happy_birthday_baby_panda_orbit.mp4",
+"hatching_dragon_egg_fwd.mp4",
+"heart_made_of_glass_fwd.mp4",
+"hedgehog_fwd.mp4",
+"hole_in_wall_fwd.mp4",
+"horned_goat_orbit.mp4",
+"horse_fwd.mp4",
+"horse_painting_fwd.mp4",
+"house_near_the_water_orbit.mp4",
+"ice_cream_frosting_cupcake_in_white_room_orbit.mp4",
+"ice_cream_sundae_parfait_fwd.mp4",
+"ice_cream_white_cupcake_fwd.mp4",
+"interior_bonfire_cathedral_fwd.mp4",
+"interior_farmhouse_fwd.mp4",
+"interior_gallery_fwd.mp4",
+"interior_living_room_mirror_fwd.mp4",
+"interior_lounge_chairs_2_fwd.mp4",
+"interior_lounge_chairs_fwd.mp4",
+"kangaroo_costume_orbit.mp4",
+"kangaroo_orbit.mp4",
+"kangaroo_playing_basketball_fwd.mp4",
+"kangaroo_with_baby_fwd.mp4",
+"kitchen_with_big_cauldron_fwd.mp4",
+"knit_crochet_amigurumi_bee_orbit.mp4",
+"lamb_by_window_fwd.mp4",
+"lasagna_fwd.mp4",
+"leaning_tower_of_pisa_orbit.mp4",
+"lemon_guy_in_city_fwd.mp4",
+"lemon_wearing_glasses_and_sneakers_orbit.mp4",
+"lemon_with_glasses_fwd.mp4",
+"library_candle_fwd.mp4",
+"little_creature_in_flower_fwd.mp4",
+"loaf_of_bread_fwd.mp4",
+"lobster2_fwd.mp4",
+"lobster_fwd.mp4",
+"low_poly_crab_fwd.mp4",
+"low_poly_dog_orbit.mp4",
+"low_poly_palm_tree_fwd.mp4",
+"low_poly_palm_tree_orbit.mp4",
+"lunch_outside_fwd.mp4",
+"lush_village_fwd.mp4",
+"magical_flower_fwd.mp4",
+"magical_flower_orbit.mp4",
+"magician_turtle_with_tophat_orbit.mp4",
+"man_above_the_clouds_fwd.mp4",
+"man_holding_shell_underwater_fwd.mp4",
+"mech_robot_fwd.mp4",
+"mech_robot_orbit.mp4",
+"mermaid_underwater_fwd.mp4",
+"metallic_ducks_fwd.mp4",
+"metallic_heart_orbit.mp4",
+"mochi_cat_1_fwd.mp4",
+"mochi_cat_2_fwd.mp4",
+"mochi_cat_3_fwd.mp4",
+"mochi_cat_4_fwd.mp4",
+"mochi_cat_5_fwd.mp4",
+"mochi_cat_6_fwd.mp4",
+"mochi_cat_with_cone_fwd.mp4",
+"mojito_by_the_beach_orbit.mp4",
+"monet_hay_stack_orbit.mp4",
+"mosque_fwd.mp4",
+"mouse_fwd.mp4",
+"mouse_orbit.mp4",
+"mr_lemon_man_orbit.mp4",
+"mushroom_in_forest_orbit.mp4",
+"mysterious_person_in_alley_fwd.mp4",
+"night_time_mountain_shrine_fwd.mp4",
+"noodle_soup_with_flowers_fwd.mp4",
+"old_timey_racecar_2_orbit.mp4",
+"old_timey_racecar_orbit.mp4",
+"orange_road_bike_orbit.mp4",
+"origami_hippo_fwd.mp4",
+"otter_wearing_sunglasses_orbit.mp4",
+"overgrown_car_in_forest_clearing_fwd.mp4",
+"overgrown_car_in_forest_clearing_orbit.mp4",
+"painting_of_car_fwd.mp4",
+"painting_of_landscape_fwd.mp4",
+"pair_of_gummy_bears_orbit.mp4",
+"pair_of_teddy_bears_fwd.mp4",
+"panda_in_boat_fwd.mp4",
+"panda_in_tiny_car_orbit.mp4",
+"panda_orbit.mp4",
+"pasta_with_red_tomato_sauce_fwd.mp4",
+"pasta_with_red_tomato_sauce_orbit.mp4",
+"penguin_at_the_beach_fwd.mp4",
+"pharaoh_texting_orbit.mp4",
+"pigeon_fwd.mp4",
+"pile_of_fruit_orbit.mp4",
+"pineapple_on_table_4_fwd.mp4",
+"pineapple_on_table_fwd.mp4",
+"pineapple_on_table_orbit.mp4",
+"pink_flower_fwd.mp4",
+"pink_room_of_flowers_orbit.mp4",
+"pixellated_man_in_vest_fwd.mp4",
+"pizza_fwd.mp4",
+"porcelain_lion_orbit.mp4",
+"prairie_fwd.mp4",
+"pug_dressed_as_bumblebee_orbit.mp4",
+"purple_haired_dragon_fwd.mp4",
+"rabbit_in_suit_fwd.mp4",
+"rabbit_in_suit_orbit.mp4",
+"rabbit_mowing_the_lawn_orbit.mp4",
+"rabbit_working_on_laptop_orbit.mp4",
+"ramen_fwd.mp4",
+"recliner_chair_orbit.mp4",
+"red_bird_orbit.mp4",
+"red_sports_car_fwd.mp4",
+"red_stand_mixer_fwd.mp4",
+"red_stand_mixer_orbit.mp4",
+"regal_dragon_fwd.mp4",
+"rhino_2_fwd.mp4",
+"rhino_fwd.mp4",
+"robot_building_stuff_orbit.mp4",
+"robot_doing_homework_fwd.mp4",
+"robot_doing_taxes_orbit.mp4",
+"robot_playing_cello_fwd.mp4",
+"robot_sitting_by_waterfront_orbit.mp4",
+"robot_wearing_skis_in_a_supermarket_orbit.mp4",
+"robot_working_in_factory_fwd.mp4",
+"rock_arch_over_ocean_orbit.mp4",
+"rodent_warrior_fwd.mp4",
+"rodent_with_shield_and_sword_orbit.mp4",
+"sasquatch_fwd.mp4",
+"sasquatch_orbit.mp4",
+"scary_road_fwd.mp4",
+"shiny_silver_robot_cat_orbit.mp4",
+"silver_robot_cat_orbit.mp4",
+"single_croissant_fwd.mp4",
+"single_palm_tree_on_beach_orbit.mp4",
+"skeleton_cartoon_character_fwd.mp4",
+"skeleton_fwd.mp4",
+"skeleton_smoking_fwd.mp4",
+"sleeping_cat_fwd.mp4",
+"snail_fwd.mp4",
+"spiky_hair_walking_character_fwd.mp4",
+"squirrel_fwd.mp4",
+"stack_of_chocolate_chip_cookies_orbit.mp4",
+"stack_of_double_chocolate_chip_cookies_orbit.mp4",
+"stack_of_double_chocolate_cookies_fwd.mp4",
+"stack_of_pancakes_fwd.mp4",
+"stack_of_pancakes_orbit.mp4",
+"stack_of_rocks_in_river_fwd.mp4",
+"stacked_pile_of_rocks_in_river_orbit.mp4",
+"stationary_bike_orbit.mp4",
+"statue_of_liberty_orbit.mp4",
+"stone_cottage_in_field_fwd.mp4",
+"stone_cottage_in_field_orbit.mp4",
+"strange_cake_orbit.mp4",
+"strawberry_fwd.mp4",
+"swirly_toast_fwd.mp4",
+"teddy_bear_in_city_4_fwd.mp4",
+"teddy_bear_in_the_city_orbit.mp4",
+"teddy_bear_in_the_snow_orbit.mp4",
+"teddy_bear_orbit.mp4",
+"teddy_bear_with_helmet_and_cape_on_motorcycle_orbit.mp4",
+"teddy_bears_holding_groceries_orbit.mp4",
+"toast_plushie_fwd.mp4",
+"tomatoes_in_pot_fwd.mp4",
+"toy_tractor_fwd.mp4",
+"tractor_in_field_orbit.mp4",
+"tropical_mountain_island_orbit.mp4",
+"tulips_fwd.mp4",
+"tulips_orbit.mp4",
+"turquoise_scooter_orbit.mp4",
+"two_cacti_in_pots_orbit.mp4",
+"under_bridge_lights_fwd.mp4",
+"underwater_man_orbit.mp4",
+"van_gogh_bedroom_fwd.mp4",
+"vegetable_robot_orbit.mp4",
+"velvet_bag_of_marbles_fwd.mp4",
+"velvet_bag_of_marbles_orbit.mp4",
+"video_game_box_orbit.mp4",
+"video_game_world_fwd.mp4",
+"walrus_smoking_pipe_orbit.mp4",
+"waterfall_fwd.mp4",
+"wine_and_grapes_fwd.mp4",
+"wine_and_grapes_orbit.mp4",
+"wine_on_chess_board_fwd.mp4",
+"wolf_mural_fwd.mp4",
+"woman_at_beach_fwd.mp4",
+"woman_in_forest_orbit.mp4",
+"woman_with_plants_watching_tv_fwd.mp4",
+"wooden_dog_fwd.mp4",
+"wooden_dog_orbit.mp4",
+"wooden_library_fwd.mp4",
+"wooden_pawn_orbit.mp4",
+"world_cake_fwd.mp4",
+"yellow_building_2_fwd.mp4",
+"yellow_building_fwd.mp4",
+"yellow_maple_leaf_orbit.mp4",
+    ];
+  
+    const omitPhrases = [
+      'a wide angle DSLR photo of',
+      'a zoomed out DSLR photo of',
+      'a DSLR photo of',
+    ];
+
+var intervalId = window.setInterval(function(){
+  document.querySelectorAll('video').forEach(vid => vid.play());
+}, 1000);
+  
+    shuffleArray(videoPaths);
+  
+    // document.addEventListener("DOMContentLoaded", function() {
+      var thumbnails = document.getElementById("thumbnails");
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  
+  
+      for (var i = 0; i < videoPaths.length; i++) {
+        var outer = document.createElement("DIV");
+        outer.classList = "thumbnail outer card";
+        var inner = document.createElement("DIV");
+	inner.style.padding = "5px";
+        inner.classList = "inner card-body";
+  
+        let videoPath = videoPaths[i];
+        let caption = videoPath.replace('.mp4', "").replaceAll("_", " ");
+
+        // let captionShort = caption;
+        // for (let i = 0; i < omitPhrases.length; i++) {
+        //   captionShort = captionShort.replace(omitPhrases[i], '[...]');
+        // }
+        let captionShort = ""
+  
+        var componentVideo = document.createElement("VIDEO");
+        componentVideo.loop = true;
+        componentVideo.playsinline = true;
+        // componentVideo.preload = "metadata";
+        componentVideo.muted = true;
+        //componentVideo.width = "333";
+	componentVideo.style.width = "100%"
+        componentVideo.autoplay = true;
+        if (isIOS) {
+          // Autoplay doesn't seem to work.
+          componentVideo.classList = "video";
+          componentVideo.src = "https://storage.googleapis.com/gallery_videos/v0/" + videoPath;
+          componentVideo.controls = true;
+        } else {
+          componentVideo.controls = false;
+          componentVideo.classList = "video lazy";
+          //componentVideo.onmouseout = componentVideo.play;
+          //componentVideo.onmouseover = componentVideo.pause;
+          componentVideo.onmousemove= componentVideo.play;
+          componentVideo.onmouseout = componentVideo.play;
+          componentVideo.onkeyup = componentVideo.play;
+          componentVideo.onmouseover = componentVideo.play;
+          componentSource = document.createElement("SOURCE")
+          componentSource.type = "video/mp4"
+          componentSource.setAttribute('data-src',
+            "https://storage.googleapis.com/gallery_videos/v0/" + videoPath);
+          componentVideo.appendChild(componentSource);
+        }
+        inner.appendChild(componentVideo);
+  
+        var fullCaption = document.createElement("span");
+        fullCaption.classList = "name invisible";
+        fullCaption.style.display = "none";
+
+        fullCaption.style.fontSize = "3px";
+        fullCaption.appendChild(document.createTextNode(caption))
+        inner.appendChild(fullCaption);
+  
+        var componentCaption = document.createElement("h6");
+        componentCaption.classList = "caption";
+        componentCaption.title = caption;
+        componentCaption.appendChild(document.createTextNode(captionShort));
+        //inner.appendChild(componentCaption);
+  
+        outer.appendChild(inner);
+        thumbnails.appendChild(outer);
+      }
+  
+      if (!isIOS) {
+        yall({
+          observeChanges: false
+        });
+      }
+    // }
+    </script>
+  
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/list.js/1.2.0/list.min.js'></script>
+    <script id="rendered-js" >
+  $(function () {
+  
+    // Search
+    var options = {
+      valueNames: ['name', 'category'] };
+  
+    var videoList = new List('videoGallery', options);
+  
+    function debounced(delay, fn) {
+      // https://jsfiddle.net/foxbunny/rL68o4ef/?utm_source=website&utm_medium=embed&utm_campaign=rL68o4ef.
+      let timerId;
+      return function (...args) {
+        if (timerId) {
+          clearTimeout(timerId);
+        }
+        timerId = setTimeout(() => {
+          fn(...args);
+          timerId = null;
+        }, delay);
+      }
+    }
+  
+    $("#search").change(debounced(1000, function () {
+      // smooth scroll to thumbnails
+      $('html, body').animate({
+        scrollTop: $("#thumbnails").offset().top - 60 },
+      1000);
+    }));
+  
+    // Filter
+    $('#filter').change(function () {
+      var selection = this.value;
+      if (selection) {
+        videoList.filter(function (item) {
+          return item.values().category == selection;
+        });
+      } else {
+        videoList.filter();
+      }
+    });
+  });
+  
+  //Get URL query string
+  function getQueryVariable(variable) {
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {if (window.CP.shouldStopExecution(0)) break;
+      var pair = vars[i].split("=");
+      if (pair[0] == variable) {return pair[1];}
+    }window.CP.exitedLoop(0);
+    return false;
+  }
+  // Get URL query string variables
+  var id = getQueryVariable("id");
+  var title = getQueryVariable("title");
+  
+  </script>
+
+
+</body>
+
+</html>
