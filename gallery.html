@@ -523,7 +523,7 @@ var intervalId = window.setInterval(function(){
           // Autoplay doesn't seem to work.
           componentVideo.classList = "video";
           componentVideo.src = "https://storage.googleapis.com/gallery_videos/v1/" + videoPath;
-          componentVideo.controls = true;
+          componentVideo.controls = false;
         } else {
           componentVideo.controls = false;
           componentVideo.classList = "video lazy";
